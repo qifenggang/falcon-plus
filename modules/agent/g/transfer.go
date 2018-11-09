@@ -30,18 +30,19 @@ var (
 
 func SendMetrics(metrics []*model.MetricValue, resp *model.TransferResponse) {
 	rand.Seed(time.Now().UnixNano())
-	for _, i := range rand.Perm(len(Config().Transfer.Addrs)) {
-		addr := Config().Transfer.Addrs[i]
+    for i,_ := range Config().Transfer.Addrs { //同时并发给config里面配置的所有transfer，支持过渡时期双写
+            addr := Config().Transfer.Addrs[i]
 
-		c := getTransferClient(addr)
-		if c == nil {
-			c = initTransferClient(addr)
-		}
+            c := getTransferClient(addr)
+            if c == nil {
+                    c = initTransferClient(addr)
+            }
 
-		if updateMetrics(c, metrics, resp) {
-			break
-		}
-	}
+            if updateMetrics(c, metrics, resp) {
+                    //break
+            }
+    }
+
 }
 
 func initTransferClient(addr string) *SingleConnRpcClient {
